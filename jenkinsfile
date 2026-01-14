@@ -1,50 +1,52 @@
-pipeline{
-agent any
-	environment{
-	DOCKERHUB_CREDENTIALS=credentials('dockerhubID')
-	DOCKER_IMAGE="josh57/new-test"
-	}
-	stages{
-	stage('Checkout')
-	{
-		steps{
-			git(url:"https://github.com/joshua-mnz/new-test",branch:"main")	
-		}
-	}
-	stage('Build')
-	{
-		steps
-		{
-			script{ 
-			IMG=docker.build("${DOCKER_IMAGE}:latest")
-			}
-		}
-	}
-	stage('Docker Push')
-	{
-		steps
-		{
-			script{
-				docker.withRegistry("https://hub.registry.docker.com","dockerhubID")
-		{
-			IMG.push()
-		}
-			}
-		}
-	}
-	}
-	post{
-		success{
-		echo "Success"
-		}
-		failure
-		{
-			echo "Failure"
-		}
-		always
-		{
-			echo "Cleaning DIR"
+pipeline {
+    agent any 
+    
+    environment {
+        DOCKERHUB_CREDENTIALS = credentials('dockerhubID')  // lowercase 'c'
+        IMAGE_NAME = "josh57/new-test"
+    }
+    
+    stages {
+        stage('Checkout') {  // Fixed quotes: '' not ''
+            steps {
+                
+                git(
+                    url: 'https://github.com/joshua-mnz.new-test',
+                    branch: 'main'
+                )
+            }
+        }
+        
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    dockerImage = docker.build("${IMAGE_NAME}:latest")
+                }
+            }
+        }
+
+        stage('Push to DockerHub') {
+            steps {
+                script {
+                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub') {
+                        dockerImage.push()
+                    }
+                }
+            }
+        }
+    }
+    
+    post {
+
+        success {
+            echo 'Pipeline succeeded!'
+        }
+        failure {
+            echo 'Pipeline failed!'
+        }
+		always{
+			echo 'Cleaning up workspace…'
 			deleteDir()
-		}
-	}
+			}
+    }
 }

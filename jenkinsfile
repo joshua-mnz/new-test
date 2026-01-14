@@ -11,7 +11,7 @@ pipeline {
             steps {
                 
                 git(
-                    url: 'https://github.com/joshua-mnz.new-test',
+                    url: 'https://github.com/joshua-mnz/new-test',
                     branch: 'main'
                 )
             }
